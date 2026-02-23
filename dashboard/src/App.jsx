@@ -58,12 +58,6 @@ const Hero = () => {
   return (
     <section ref={heroRef} className="relative h-[100dvh] w-full bg-textdark flex items-end p-8 md:p-16 overflow-hidden pt-36">
       <div className="absolute inset-0 w-full h-full">
-        {/* Unsplash abstract brutalist concrete texture */}
-        <img
-          src="https://images.unsplash.com/photo-1547820463-bb47fecd8827?q=80&w=2500&auto=format&fit=crop"
-          alt="Concrete"
-          className="w-full h-full object-cover opacity-60"
-        />
         <div className="absolute inset-0 bg-gradient-to-t from-textdark via-textdark/80 to-transparent"></div>
       </div>
 
