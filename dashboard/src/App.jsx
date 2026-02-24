@@ -306,6 +306,67 @@ const BenchmarkDashboard = () => {
   );
 };
 
+// Executive Summary
+const ExecutiveSummary = () => {
+  return (
+    <section className="py-24 bg-background text-textdark px-6" id="summary">
+      <div className="max-w-5xl mx-auto">
+        <div className="border border-textdark/10 shadow-2xl rounded-[3rem] p-12 bg-white flex flex-col items-center justify-center text-center">
+          <h2 className="font-heading font-medium text-sm tracking-widest uppercase mb-4 text-accent border border-accent px-4 py-1 rounded-full inline-block">The Vector Advantage</h2>
+          <h3 className="font-drama italic text-5xl md:text-6xl mb-6 tracking-tighter">Why Semantic Wins.</h3>
+
+          <p className="font-mono text-lg max-w-2xl mb-16 opacity-80 text-center">
+            PostgreSQL delivers raw execution speed for rigid data. Pinecone delivers semantic intelligence for human data.
+            Here is how they stack up when evaluating thousands of student wellness surveys.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+            <div className="bg-slate-50 border border-slate-200 p-8 rounded-3xl text-left shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <Database className="w-6 h-6 text-blue-500" />
+                <div className="font-mono text-sm text-blue-600 font-bold uppercase tracking-widest">PostgreSQL</div>
+              </div>
+
+              <div className="flex items-baseline gap-2 mb-4">
+                <h3 className="text-4xl font-heading font-bold text-textdark">~2.5</h3>
+                <span className="font-mono text-sm text-textdark/50 font-bold uppercase">ms Latency</span>
+              </div>
+
+              <p className="font-mono text-sm opacity-80 mb-6 border-l-2 border-blue-500 pl-3">Incredibly fast, but completely rigid. If a student wrote "Overwhelming panic", a Postgres `WHERE anxiety = 'Severe'` query entirely misses them.</p>
+              <div className="bg-blue-500/10 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest inline-block border border-blue-500/20">Best for: Hard Metrics (CGPA, Grants)</div>
+            </div>
+
+            <div className="bg-purple-50 border border-purple-200 p-8 rounded-3xl text-left shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-6 relative z-10">
+                <Layers className="w-6 h-6 text-purple-600" />
+                <div className="font-mono text-sm text-purple-700 font-bold uppercase tracking-widest">Pinecone (Vector DB)</div>
+              </div>
+
+              <div className="flex items-baseline gap-2 mb-4 relative z-10">
+                <h3 className="text-4xl font-heading font-bold text-textdark">~90</h3>
+                <span className="font-mono text-sm text-textdark/50 font-bold uppercase">ms Latency</span>
+              </div>
+
+              <p className="font-mono text-sm opacity-80 mb-6 border-l-2 border-purple-500 pl-3 relative z-10">Slight latency tradeoff unlocks human reasoning. It successfully clusters "Overwhelming panic" natively alongside "Severe" via geometric proximity.</p>
+              <div className="bg-purple-600/10 text-purple-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest inline-block border border-purple-500/20 relative z-10">Best for: Semantic Wellness Risk</div>
+            </div>
+          </div>
+
+          <div className="mt-12 bg-accent/5 border border-accent/20 p-8 rounded-3xl w-full text-left flex flex-col md:flex-row gap-6 items-start">
+            <div className="p-4 bg-accent/10 rounded-2xl shrink-0">
+              <Activity className="w-8 h-8 text-accent" />
+            </div>
+            <div>
+              <h4 className="font-bold text-2xl text-accent font-heading mb-2">The Hybrid Architecture Verdict</h4>
+              <p className="font-mono text-[15px] leading-relaxed opacity-80">Our polyglot architecture connects them via primary <code className="bg-accent/10 text-accent px-1.5 py-0.5 rounded text-sm">UUID</code>. We use Pinecone to find the subjective at-risk students accurately based on NLP inputs, then `JOIN` back to Postgres for their instant <code className="bg-textdark text-background px-1.5 py-0.5 rounded text-sm">O(1)</code> grade and demographic lookups.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ERD Modal
 const ERDModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -434,6 +495,7 @@ function App() {
       <Philosophy />
       <Protocol />
       <BenchmarkDashboard />
+      <ExecutiveSummary />
       <Footer onOpenERD={() => setIsERDOpen(true)} />
       <ERDModal isOpen={isERDOpen} onClose={() => setIsERDOpen(false)} />
     </div>

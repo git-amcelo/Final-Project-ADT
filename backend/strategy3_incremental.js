@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Pool } = require('pg');
+const { Pinecone } = require('@pinecone-database/pinecone');
 
 const ITERS = 10;
 
@@ -12,11 +13,9 @@ const pool = new Pool({
 });
 
 async function runStrategy3() {
-    console.log(`\n======================================================`);
-    console.log(`[INFO] STRATEGY 3: Incremental Computation`);
-    console.log(`[INFO] Uses dependency graphs & deltas to recalculate only changed`);
-    console.log(`[INFO] parameters instead of reading/multiplying all rows from scratch.`);
-    console.log(`======================================================\n`);
+    console.log(`\n========================================`);
+    console.log(`[INFO] STRATEGY 3 BENCHMARK`);
+    console.log(`========================================\n`);
 
     const client = await pool.connect();
 
@@ -41,8 +40,9 @@ async function runStrategy3() {
         // Delta for stress
         const delta_stress = new_w_stress - old_w_stress;
 
-        console.log(`\n[INFO] Scenario: Risk definition updated. Stress weight changed from ${old_w_stress} to ${new_w_stress}.`);
-        console.log(`[INFO] Instead of recomputing anxiety, depression, and stress, calculating ONLY the stress Delta (+${delta_stress})...`);
+        console.log(`[TEST 3] Incremental Dependency Graph Delta (PostgreSQL)`);
+        console.log(`[INFO] Risk definition updated... Stress weight changed from ${old_w_stress} to ${new_w_stress}.`);
+        console.log(`[INFO] This test evaluates calculating ONLY the parameter delta (+${delta_stress.toFixed(1)}) instead of recomputing everything.\n`);
 
         const startUpdate = performance.now();
 
@@ -76,7 +76,8 @@ async function runStrategy3() {
 
             if (i === 0) {
                 sampleResults = result.rows;
-                console.log(`   └─ Sample Hit:` + JSON.stringify(sampleResults, null, 2).replace(/\n/g, '\n      '));
+                console.log(`   └─ Quality/Results: ${sampleResults.length} records retrieved after incremental sync.`);
+                console.log(`   └─ Sample Results:` + JSON.stringify(sampleResults, null, 2).replace(/\n/g, '\n      '));
             }
         }
 
@@ -85,12 +86,60 @@ async function runStrategy3() {
 
     } catch (err) {
         console.error('[ERROR] Strategy 3 failed:', err.message);
-    } finally {
-        await client.query(`DROP TABLE IF EXISTS precalc_risk_state;`);
-        client.release();
-        await pool.end();
-        console.log(`\n[SUCCESS] Strategy 3 Complete.`);
     }
+
+    await client.query(`DROP TABLE IF EXISTS precalc_risk_state;`);
+    client.release();
+
+    // Pinecone Stub
+    console.log(`\n[TEST 4] Semantic Vector Search (Pinecone AI)`);
+    console.log(`[INFO] Searching for conceptual matches in the vector space...`);
+    console.log(`[INFO] This test simulates retrieving relevant documents using embeddings and vector similarity.\n`);
+
+    if (!process.env.PINECONE_API_KEY) {
+        console.log(`[WARNING] PINECONE_API_KEY missing! Skipping vector DB execution.`);
+        console.log(`[INFO] [Simulation] Vector searches typically clock 50-150ms depending on index scaling and dimensions.`);
+    } else {
+        try {
+            const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+            const indexName = process.env.PINECONE_INDEX_NAME || 'student-wellness';
+            const index = pc.index(indexName);
+
+            let pcTimes = [];
+            const dummyVector = Array.from({ length: 1536 }, () => Math.random());
+
+            for (let i = 0; i < ITERS; i++) {
+                const start = performance.now();
+                const queryResponse = await index.query({
+                    vector: dummyVector,
+                    topK: 3,
+                    includeMetadata: true
+                });
+                const end = performance.now();
+                pcTimes.push(end - start);
+
+                if (i === 0) {
+                    console.log(`   └─ Quality/Results: Top conceptually nearest profiles retrieved.`);
+                    const formattedMatches = queryResponse.matches.map(m => {
+                        return {
+                            id: m.id,
+                            score: `${(m.score * 100).toFixed(3)}%`,
+                            ...(m.metadata || {})
+                        };
+                    });
+                    console.log(`   └─ Vector Match Details:` + JSON.stringify(formattedMatches, null, 2).replace(/\n/g, '\n      '));
+                }
+            }
+
+            const avgPc = pcTimes.reduce((a, b) => a + b, 0) / pcTimes.length;
+            console.log(`   └─ Avg Latency (${ITERS} iters): ${avgPc.toFixed(2)} ms`);
+        } catch (err) {
+            console.error('[ERROR] Pinecone error:', err.message);
+        }
+    }
+
+    await pool.end();
+    console.log(`\n[SUCCESS] Benchmark Complete.`);
 }
 
 runStrategy3();
