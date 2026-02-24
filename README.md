@@ -6,13 +6,13 @@ This project tracks and analyzes the interplay between student mental wellness a
 
 | Task ID | Task Description | Assignee | Status | Dependencies | Evaluation / Demo Remarks |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | Database Schema & Relational Modeling | **Member 1** | Completed | None | The ER Schema and normalized script `database/init.sql` |
-| **2** | Data Cleaning & Ingestion Scripting | **Member 2** | Completed | Task 1 | `backend/seed.js` effectively digests `Raw Data.csv` |
+| **1** | Database Schema & Relational Modeling | **Member 1** | Completed | None | ER Schema and normalized script `database/init.sql` |
+| **2** | Data Cleaning & Ingestion Scripting | **Member 2** | Completed | Task 1 | `backend/seed.js` securely digests `Raw Data.csv` |
 | **3** | GitHub Setup & Version Control | **Member 3** | Completed | None | The repository setup, branches, and commit tracking initialized |
-| **4** | Vector DB (Pinecone) Configuration | **Member 4** | In Progress | Task 2 | Generating API keys and setting up Pinecone embedding pipeline |
-| **5** | Query Optimization & Benchmark Testing | **Member 5** | In Progress | Task 1, 4 | See `backend/benchmark.js` for latency and precise lookups vs Vector semantic query |
-| **6** | Backend API Initialization (Node.js) | **Member 6** | Pending | Task 1 | Establishing REST endpoints in Node.js/Express |
-| **7** | Frontend UI/Dashboard | **Member 7** | Completed | Task 6 | Configured `frontend/` with dynamic HTML, CSS & Vanilla JS |
+| **4** | Vector DB (Pinecone) Configuration | **Member 4** | Completed | Task 2 | Configured Pinecone cluster, embedded keys, and logic |
+| **5** | Query Optimization & Benchmarking | **Member 5** | Completed | Task 1, 4 | Executed `strategy_1...4.js` proving Postgres vs Pinecone latency |
+| **6** | Backend API & Router Initialization | **Member 6** | Completed | Task 1, 5 | REST API in `server.js` exposing the benchmark executions |
+| **7** | Dynamic Dashboard Initialization | **Member 7** | Completed | Task 6 | Built `dashboard/` with React/Vite/GSAP mapping execution feeds |
 
 
 ## Demo Run Instructions (Mid-Point Check)
