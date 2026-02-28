@@ -1,3 +1,9 @@
+/**
+ * @author Hemit Rana
+ * @date 2026-02-22
+ * @description This script initializes the relational schema and indexes for student health records.
+ */
+
 CREATE TABLE IF NOT EXISTS student_health_records (
     id SERIAL PRIMARY KEY,
     age VARCHAR(255),
