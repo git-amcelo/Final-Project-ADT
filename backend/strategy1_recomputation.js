@@ -12,6 +12,7 @@ const pool = new Pool({
     port: process.env.DB_PORT || 5432,
 });
 
+//this module is evaluating recomputation strategy
 async function runStrategy1() {
     console.log(`\n========================================`);
     console.log(`[INFO] STRATEGY 1 BENCHMARK`);
