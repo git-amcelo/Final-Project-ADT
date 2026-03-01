@@ -1,3 +1,8 @@
+/**
+ * @author Jasmeen Kaur
+ * @date 2026-02-28
+ * @description implement recomputation optimization strategy 
+ */
 require('dotenv').config();
 const { Pool } = require('pg');
 const { Pinecone } = require('@pinecone-database/pinecone');
@@ -114,3 +119,4 @@ async function runStrategy1() {
 }
 
 runStrategy1();
+
