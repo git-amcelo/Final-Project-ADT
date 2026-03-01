@@ -1,3 +1,8 @@
+/**
+ * @author Charmiben Patel
+ * @date 2026-02-28
+ * @description Configure Pinecone cluster and embedding infrastructure.
+ */
 require('dotenv').config();
 const { Pool } = require('pg');
 const { Pinecone } = require('@pinecone-database/pinecone');
@@ -150,3 +155,4 @@ async function runBenchmark() {
 }
 
 runBenchmark();
+
