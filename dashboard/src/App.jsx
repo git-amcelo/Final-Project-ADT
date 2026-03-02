@@ -335,7 +335,7 @@ const BenchmarkDashboard = () => {
             <button
               onClick={executeBenchmark}
               disabled={isRunning || activeTab !== 0}
-              className="w-full py-4 mt-8 bg-primary text-textdark rounded-full font-bold tracking-widest uppercase hover:bg-accent hover:text-white transition-colors disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-4 mt-8 bg-accent text-white rounded-full font-bold tracking-widest uppercase hover:bg-primary hover:text-textdark transition-colors disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isRunning ? (
                 <><Activity className="w-5 h-5 animate-spin" /> Executing Script...</>

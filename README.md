@@ -2,18 +2,6 @@
 
 This project tracks and analyzes the interplay between student mental wellness and academic success, applying modern RAG principles with PostgreSQL (Relational) and Pinecone (Vector/Semantic Database).
 
-## Mid-Project Evaluation TBS (Task Breakdown Structure) - 7 Members
-
-| Task ID | Task Description | Assignee | Status | Dependencies | Evaluation / Demo Remarks |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | Database Schema & Relational Modeling | **Member 1** | Completed | None | ER Schema and normalized script `database/init.sql` |
-| **2** | Data Cleaning & Ingestion Scripting | **Member 2** | Completed | Task 1 | `backend/seed.js` securely digests `Raw Data.csv` |
-| **3** | GitHub Setup & Version Control | **Member 3** | Completed | None | The repository setup, branches, and commit tracking initialized |
-| **4** | Vector DB (Pinecone) Configuration | **Member 4** | Completed | Task 2 | Configured Pinecone cluster, embedded keys, and logic |
-| **5** | Query Optimization & Benchmarking | **Member 5** | Completed | Task 1, 4 | Executed `strategy_1...4.js` proving Postgres vs Pinecone latency |
-| **6** | Backend API & Router Initialization | **Member 6** | Completed | Task 1, 5 | REST API in `server.js` exposing the benchmark executions |
-| **7** | Dynamic Dashboard Initialization | **Member 7** | Completed | Task 6 | Built `dashboard/` with React/Vite/GSAP mapping execution feeds |
-
 
 ## Demo Run Instructions (Mid-Point Check)
 
