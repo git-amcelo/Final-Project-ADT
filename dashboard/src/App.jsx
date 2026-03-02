@@ -12,28 +12,71 @@ const Navbar = () => {
 
   useEffect(() => {
     let ctx = gsap.context(() => {
+      const nav = navRef.current;
+
+      // Initial state: Dark theme (light text)
+      gsap.set(nav, {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderColor: "rgba(255, 255, 255, 0.1)",
+        color: "#E8E4DD" // primary/background
+      });
+
+      const sections = gsap.utils.toArray('section, footer');
+
+      sections.forEach((section) => {
+        const sectionTheme = section.getAttribute('data-theme') || 'light';
+
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top 60px",
+          end: "bottom 60px",
+          onToggle: (self) => {
+            if (self.isActive && window.scrollY < window.innerHeight * 2) {
+              if (sectionTheme === 'dark') {
+                gsap.to(nav, { backgroundColor: "rgba(255, 255, 255, 0.1)", borderColor: "rgba(255, 255, 255, 0.1)", color: "#E8E4DD", duration: 0.4 });
+              } else {
+                gsap.to(nav, { backgroundColor: "rgba(245, 243, 238, 0.8)", borderColor: "rgba(17, 17, 17, 0.1)", color: "#111111", duration: 0.4 });
+              }
+            }
+          }
+        });
+      });
+
+      // Threshold: 200vh - Force Black Text
       ScrollTrigger.create({
-        start: 'top -100',
-        end: 99999,
-        toggleClass: {
-          className: 'bg-background/80 backdrop-blur-xl border-textdark/10 shadow-sm border',
-          targets: navRef.current
+        start: () => window.innerHeight * 2,
+        onEnter: () => {
+          gsap.to(nav, { backgroundColor: "rgba(245, 243, 238, 0.8)", borderColor: "rgba(17, 17, 17, 0.1)", color: "#111111", duration: 0.4 });
+        },
+        onLeaveBack: () => {
+          // Re-evaluate current section theme when scrolling back up
+          const currentSection = sections.find(s => {
+            const rect = s.getBoundingClientRect();
+            return rect.top <= 60 && rect.bottom >= 60;
+          });
+          const theme = currentSection?.getAttribute('data-theme') || 'light';
+          if (theme === 'dark') {
+            gsap.to(nav, { backgroundColor: "rgba(255, 255, 255, 0.1)", borderColor: "rgba(255, 255, 255, 0.1)", color: "#E8E4DD", duration: 0.4 });
+          } else {
+            gsap.to(nav, { backgroundColor: "rgba(245, 243, 238, 0.8)", borderColor: "rgba(17, 17, 17, 0.1)", color: "#111111", duration: 0.4 });
+          }
         }
       });
-      // Text logic handling could go here for light/dark transitions
     }, navRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between px-6 py-4 w-[95%] max-w-5xl rounded-full transition-colors duration-500 text-background mix-blend-difference border border-transparent">
+    <nav
+      ref={navRef}
+      className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between px-6 py-4 w-[95%] max-w-5xl rounded-full transition-all duration-300 backdrop-blur-md border shadow-lg"
+    >
       <div className="font-heading font-bold text-xl tracking-tight">WellnessRAG</div>
       <div className="hidden md:flex gap-8 font-mono text-sm">
         {['Methodology', 'Benchmarks'].map((i) => (
           <a key={i} href={`#${i.toLowerCase()}`} className="lowercase transition-transform hover:-translate-y-[1px]">{i}</a>
         ))}
       </div>
-
     </nav>
   );
 };
@@ -57,7 +100,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section ref={heroRef} className="relative h-[100dvh] w-full bg-textdark flex items-end p-8 md:p-16 overflow-hidden pt-36">
+    <section ref={heroRef} data-theme="dark" className="relative h-[100dvh] w-full bg-textdark flex items-end p-8 md:p-16 overflow-hidden pt-36">
       <div className="absolute inset-0 w-full h-full">
         <div className="absolute inset-0 bg-gradient-to-t from-textdark via-textdark/80 to-transparent"></div>
       </div>
@@ -101,7 +144,7 @@ const Philosophy = () => {
   }, []);
 
   return (
-    <section ref={philRef} className="relative py-48 bg-textdark text-background overflow-hidden px-6 md:px-16">
+    <section ref={philRef} data-theme="dark" className="relative py-48 bg-textdark text-background overflow-hidden px-6 md:px-16">
       <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=2000&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-10 mix-blend-overlay" />
       <div className="max-w-4xl mx-auto relative z-10 flex flex-col gap-8">
         <p className="phil-line font-mono text-primary/60 uppercase tracking-widest text-sm">Most analytics focuses on: static schema queries.</p>
@@ -160,7 +203,7 @@ const Protocol = () => {
   }, []);
 
   return (
-    <section ref={containerRef} className="py-32 px-6" id="methodology">
+    <section ref={containerRef} data-theme="light" className="py-32 px-6" id="methodology">
       <div className="mb-24 text-center">
         <h2 className="font-heading font-medium text-sm tracking-widest uppercase mb-4 text-accent border border-accent px-4 py-1 rounded-full inline-block">Methodology</h2>
         <p className="font-drama italic text-5xl">The Execution Blueprint</p>
@@ -234,7 +277,7 @@ const BenchmarkDashboard = () => {
   ];
 
   return (
-    <section className="py-32 bg-primary px-6" id="benchmarks">
+    <section className="py-32 bg-primary px-6" id="benchmarks" data-theme="light">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
@@ -291,8 +334,8 @@ const BenchmarkDashboard = () => {
 
             <button
               onClick={executeBenchmark}
-              disabled={isRunning}
-              className="w-full py-4 mt-8 bg-primary text-textdark rounded-full font-bold tracking-widest uppercase hover:bg-accent hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={isRunning || activeTab !== 0}
+              className="w-full py-4 mt-8 bg-primary text-textdark rounded-full font-bold tracking-widest uppercase hover:bg-accent hover:text-white transition-colors disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isRunning ? (
                 <><Activity className="w-5 h-5 animate-spin" /> Executing Script...</>
@@ -310,7 +353,7 @@ const BenchmarkDashboard = () => {
 // Executive Summary
 const ExecutiveSummary = () => {
   return (
-    <section className="py-24 bg-background text-textdark px-6" id="summary">
+    <section className="py-24 bg-background text-textdark px-6" id="summary" data-theme="light">
       <div className="max-w-5xl mx-auto">
         <div className="border border-textdark/10 shadow-2xl rounded-[3rem] p-12 bg-white flex flex-col items-center justify-center text-center">
           <h2 className="font-heading font-medium text-sm tracking-widest uppercase mb-4 text-accent border border-accent px-4 py-1 rounded-full inline-block">The Vector Advantage</h2>
@@ -448,7 +491,7 @@ const ERDModal = ({ isOpen, onClose }) => {
 // Footer
 const Footer = ({ onOpenERD }) => {
   return (
-    <footer className="bg-[#0c0b0a] text-primary pt-32 pb-16 px-6 md:px-16 rounded-t-[4rem] -mt-10 relative z-10">
+    <footer data-theme="dark" className="bg-[#0c0b0a] text-primary pt-32 pb-16 px-6 md:px-16 rounded-t-[4rem] -mt-10 relative z-10">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 font-mono text-sm border-b border-primary/10 pb-16">
         <div className="md:col-span-2">
           <h2 className="font-heading font-bold text-3xl mb-4 text-white">WellnessRAG</h2>
