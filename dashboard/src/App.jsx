@@ -334,7 +334,7 @@ const BenchmarkDashboard = () => {
 
             <button
               onClick={executeBenchmark}
-              disabled={isRunning || activeTab !== 0}
+              disabled={isRunning}
               className="w-full py-4 mt-8 bg-accent text-white rounded-full font-bold tracking-widest uppercase hover:bg-primary hover:text-textdark transition-colors disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isRunning ? (
