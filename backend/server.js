@@ -58,6 +58,40 @@ app.get('/api/search', async (req, res) => {
     }
 });
 
+// Paginated raw data endpoint
+app.get('/api/records', async (req, res) => {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+    const offset = (page - 1) * limit;
+
+    try {
+        const client = await pool.connect();
+
+        const countResult = await client.query('SELECT COUNT(*) FROM student_health_records');
+        const total = parseInt(countResult.rows[0].count);
+
+        const { rows } = await client.query(
+            'SELECT * FROM student_health_records ORDER BY id ASC LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
+        client.release();
+
+        res.json({
+            success: true,
+            data: rows,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database query failed.' });
+    }
+});
+
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);

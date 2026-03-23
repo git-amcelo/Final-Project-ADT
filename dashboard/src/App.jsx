@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MousePointer2, Terminal, ChevronRight, Activity, Database, CheckSquare, Layers, Lock, Command } from 'lucide-react';
+import { MousePointer2, Terminal, ChevronRight, ChevronLeft, Activity, Database, CheckSquare, Layers, Lock, Command, Table2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -73,8 +73,8 @@ const Navbar = () => {
     >
       <div className="font-heading font-bold text-xl tracking-tight">WellnessRAG</div>
       <div className="hidden md:flex gap-8 font-mono text-sm">
-        {['Methodology', 'Benchmarks'].map((i) => (
-          <a key={i} href={`#${i.toLowerCase()}`} className="lowercase transition-transform hover:-translate-y-[1px]">{i}</a>
+        {['Raw Data', 'Methodology', 'Benchmarks'].map((i) => (
+          <a key={i} href={`#${i.toLowerCase().replace(' ', '-')}`} className="lowercase transition-transform hover:-translate-y-[1px]">{i}</a>
         ))}
       </div>
     </nav>
@@ -121,7 +121,259 @@ const Hero = () => {
   );
 };
 
+// Raw Data Table - Paginated PG Records
+const RawDataTable = () => {
+  const [records, setRecords] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, totalPages: 0 });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const tableRef = useRef(null);
 
+  const fetchRecords = async (page = 1, limit = 25) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`http://localhost:3000/api/records?page=${page}&limit=${limit}`);
+      const json = await res.json();
+      if (json.success) {
+        setRecords(json.data);
+        setPagination(json.pagination);
+      } else {
+        setError('Failed to load records.');
+      }
+    } catch (e) {
+      setError(`Cannot reach backend: ${e.message}`);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchRecords(pagination.page, pagination.limit);
+  }, []);
+
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      gsap.from('.raw-data-header', {
+        scrollTrigger: { trigger: tableRef.current, start: 'top 80%' },
+        y: 30, opacity: 0, duration: 0.8, ease: 'power3.out'
+      });
+    }, tableRef);
+    return () => ctx.revert();
+  }, []);
+
+  const goToPage = (p) => {
+    if (p < 1 || p > pagination.totalPages) return;
+    fetchRecords(p, pagination.limit);
+  };
+
+  const changeLimit = (newLimit) => {
+    fetchRecords(1, newLimit);
+  };
+
+  const getSeverityColor = (label) => {
+    if (!label) return 'bg-gray-500/20 text-gray-400';
+    const l = label.toLowerCase();
+    if (l.includes('severe') || l.includes('extremely')) return 'bg-red-500/20 text-red-400';
+    if (l.includes('moderate')) return 'bg-yellow-500/20 text-yellow-400';
+    if (l.includes('mild') || l.includes('low') || l.includes('light')) return 'bg-green-500/20 text-green-400';
+    if (l.includes('normal') || l.includes('minimal')) return 'bg-emerald-500/20 text-emerald-400';
+    return 'bg-blue-500/20 text-blue-400';
+  };
+
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'age', label: 'Age' },
+    { key: 'gender', label: 'Gender' },
+    { key: 'university', label: 'University' },
+    { key: 'department', label: 'Department' },
+    { key: 'academic_year', label: 'Year' },
+    { key: 'cgpa', label: 'CGPA' },
+    { key: 'scholarship', label: 'Scholarship' },
+    { key: 'anxiety_score', label: 'Anx.' },
+    { key: 'anxiety_label', label: 'Anx. Label' },
+    { key: 'stress_score', label: 'Str.' },
+    { key: 'stress_label', label: 'Str. Label' },
+    { key: 'depression_score', label: 'Dep.' },
+    { key: 'depression_label', label: 'Dep. Label' },
+  ];
+
+  const severityCols = ['anxiety_label', 'stress_label', 'depression_label'];
+
+  // Build page buttons
+  const getPageButtons = () => {
+    const pages = [];
+    const { page, totalPages } = pagination;
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push('...');
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+      if (page < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <section ref={tableRef} data-theme="dark" className="py-24 bg-[#0e0d0c] text-primary px-6 md:px-16" id="raw-data">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="raw-data-header flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-accent/10 rounded-xl">
+                <Table2 className="w-5 h-5 text-accent" />
+              </div>
+              <span className="font-mono text-xs uppercase tracking-widest text-accent">PostgreSQL Raw Data</span>
+            </div>
+            <h2 className="font-heading font-medium text-3xl md:text-4xl tracking-tighter text-white">
+              Student Health Records
+            </h2>
+            <p className="font-mono text-sm text-primary/50 mt-2">
+              {pagination.total.toLocaleString()} total records · Page {pagination.page} of {pagination.totalPages}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs text-primary/50 uppercase tracking-wider">Rows</span>
+            {[10, 25, 50].map((n) => (
+              <button
+                key={n}
+                onClick={() => changeLimit(n)}
+                className={`px-3 py-1.5 rounded-lg font-mono text-xs font-bold transition-all duration-200 ${
+                  pagination.limit === n
+                    ? 'bg-accent text-white shadow-lg shadow-accent/20'
+                    : 'bg-white/5 text-primary/60 hover:bg-white/10 hover:text-primary'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table Container */}
+        <div className="bg-[#161514] rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+          {error ? (
+            <div className="p-12 text-center">
+              <p className="text-red-400 font-mono text-sm">{error}</p>
+              <button onClick={() => fetchRecords(1, 25)} className="mt-4 px-6 py-2 bg-accent/20 text-accent rounded-full font-mono text-xs hover:bg-accent/30 transition-colors">
+                Retry
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    {columns.map((col) => (
+                      <th
+                        key={col.key}
+                        className="px-4 py-4 text-left font-mono text-[10px] uppercase tracking-widest text-primary/40 font-bold whitespace-nowrap bg-white/[0.02]"
+                      >
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-b border-white/5">
+                        {columns.map((col) => (
+                          <td key={col.key} className="px-4 py-3">
+                            <div className="h-4 bg-white/5 rounded animate-pulse" style={{ width: `${40 + Math.random() * 60}%` }} />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : records.length === 0 ? (
+                    <tr>
+                      <td colSpan={columns.length} className="px-4 py-16 text-center font-mono text-primary/40 text-sm">
+                        No records found.
+                      </td>
+                    </tr>
+                  ) : (
+                    records.map((row, idx) => (
+                      <tr
+                        key={row.id}
+                        className={`border-b border-white/5 transition-colors duration-150 hover:bg-white/[0.03] ${
+                          idx % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.01]'
+                        }`}
+                      >
+                        {columns.map((col) => (
+                          <td key={col.key} className="px-4 py-3 font-mono text-xs whitespace-nowrap">
+                            {severityCols.includes(col.key) ? (
+                              <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getSeverityColor(row[col.key])}`}>
+                                {row[col.key] || '—'}
+                              </span>
+                            ) : col.key === 'id' ? (
+                              <span className="text-accent font-bold">#{row[col.key]}</span>
+                            ) : col.key === 'cgpa' ? (
+                              <span className="text-blue-400 font-bold">{row[col.key]}</span>
+                            ) : (
+                              <span className="text-primary/70">{row[col.key] ?? '—'}</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination Footer */}
+          {!error && (
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+              <p className="font-mono text-[11px] text-primary/40">
+                Showing {((pagination.page - 1) * pagination.limit) + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total.toLocaleString()}
+              </p>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => goToPage(pagination.page - 1)}
+                  disabled={pagination.page <= 1}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                {getPageButtons().map((p, i) =>
+                  p === '...' ? (
+                    <span key={`dots-${i}`} className="px-2 text-primary/30 font-mono text-xs">…</span>
+                  ) : (
+                    <button
+                      key={p}
+                      onClick={() => goToPage(p)}
+                      className={`w-8 h-8 rounded-lg font-mono text-xs font-bold transition-all duration-200 ${
+                        pagination.page === p
+                          ? 'bg-accent text-white shadow-lg shadow-accent/20'
+                          : 'hover:bg-white/10 text-primary/60'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                )}
+
+                <button
+                  onClick={() => goToPage(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.totalPages}
+                  className="p-2 rounded-lg hover:bg-white/10 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // Philosophy
 const Philosophy = () => {
@@ -536,6 +788,7 @@ function App() {
     <div className="bg-background selection:bg-accent selection:text-white">
       <Navbar />
       <Hero />
+      <RawDataTable />
       <Philosophy />
       <Protocol />
       <BenchmarkDashboard />
